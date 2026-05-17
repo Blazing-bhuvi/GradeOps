@@ -112,6 +112,7 @@ async def start_pipeline(
 
     eid = exam_id or f"exam_{uuid.uuid4().hex[:8]}"
     exam_name = name or f"Exam {eid[-8:]}"
+    storage = get_storage()
 
     # ── Load Rubric ───────────────────────────────────────────────────────────
     if rubric_id:
