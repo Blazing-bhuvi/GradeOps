@@ -28,16 +28,32 @@ export async function createExam(exam) {
     headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(exam),
   });
-  if (!res.ok) throw new Error('Failed to create exam metadata');
+  if (!res.ok) {
+    let msg = 'Failed to create exam metadata';
+    try {
+      const err = await res.json();
+      msg = err.detail || msg;
+      if (Array.isArray(msg)) msg = msg.map(m => m.msg).join(', ');
+    } catch (e) {}
+    throw new Error(msg);
+  }
   return res.json();
 }
 
 export async function updateExamOnBackend(exam) {
-  await fetch(`${API_BASE}/metadata/exams`, {
+  const res = await fetch(`${API_BASE}/metadata/exams`, {
     method: 'POST',
     headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(exam),
   });
+  if (!res.ok) {
+    let msg = 'Failed to update exam metadata';
+    try {
+      const err = await res.json();
+      msg = err.detail || msg;
+    } catch (e) {}
+    throw new Error(msg);
+  }
 }
 
 export async function deleteExam(id) {

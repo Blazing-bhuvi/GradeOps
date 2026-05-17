@@ -66,7 +66,11 @@ export async function render(container) {
       <div class="empty" style="margin-top:60px">
         <i class="ti ti-alert-circle" aria-hidden="true"></i>
         <p>Could not reach the pipeline server.</p>
-        <p style="font-size:var(--text-sm);color:var(--neutral-400)">Make sure the FastAPI server is running on port 8000.</p>
+        <p style="font-size:var(--text-sm);color:var(--neutral-400)">
+          ${window.location.hostname === 'localhost' 
+            ? 'Make sure the FastAPI server is running on port 8000.' 
+            : 'Check your internet connection or backend logs on Vercel.'}
+        </p>
       </div>`;
     return;
   }

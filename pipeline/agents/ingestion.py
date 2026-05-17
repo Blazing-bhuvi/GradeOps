@@ -36,6 +36,21 @@ def ingestion_agent(state: ExamGradingState) -> dict:
     """
     pdf_path   = state.get("_pdf_path", "")
     rubric_raw = state.get("_rubric_raw", {})
+    exam_id    = state.get("exam_id") or f"exam_{uuid.uuid4().hex[:8]}"
+
+    # ── 0. Ensure PDF is available (Resilience for Serverless restarts) ───────
+    if not pdf_path or not Path(pdf_path).exists():
+        storage = get_storage()
+        try:
+            # If the local temp file is gone, fetch from GridFS/S3
+            print(f"[ingestion] Local path missing, fetching from storage: uploads/{exam_id}.pdf")
+            pdf_bytes = storage.read(f"uploads/{exam_id}.pdf")
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(pdf_bytes)
+                pdf_path = tmp.name
+        except Exception as e:
+            return {"error": f"PDF not found locally and could not be fetched: {e}"}
 
     # ── 1. Validate rubric ────────────────────────────────────────────────────
     try:

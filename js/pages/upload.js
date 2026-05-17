@@ -283,7 +283,7 @@ async function handleSubmit(container) {
       name: currentExamName,
       course: course ? course.code : 'CS 301',
       courseId: courseId,
-      rubricName: rubricName
+      rubric: rubricName
     });
 
     setProgress(container, 40, 'Ingestion complete', 'Splitting PDF into per-student pages…');
