@@ -8,8 +8,10 @@
 
 import { getAuthHeaders } from './auth.js';
 
-// Use the current origin as the API base if we're not on the default dev port (3000)
-const API_BASE = window.location.port === '3000' ? 'http://localhost:8000' : '';
+// If running on Vercel or production, use relative paths. For dev (port 3000), use localhost:8000
+const API_BASE = (window.location.port === '3000' || window.location.hostname === 'localhost') 
+  ? 'http://localhost:8000' 
+  : '';
 
 /**
  * Start the grading pipeline for an exam.

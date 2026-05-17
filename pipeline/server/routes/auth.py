@@ -5,6 +5,7 @@ server/routes/auth.py — JWT Authentication and User Management.
 from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from bson import ObjectId
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -150,3 +151,26 @@ async def list_users(current_user: UserOut = Depends(check_role("instructor"))):
         user["id"] = str(user["_id"])
         users.append(UserOut(**user))
     return users
+
+@router.post("/users/{user_id}/toggle-role")
+async def toggle_user_role(user_id: str, current_user: UserOut = Depends(check_role("instructor"))):
+    db = get_db()
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_role = "ta" if user.get("role") == "instructor" else "instructor"
+    await db.users.update_one({"_id": ObjectId(user_id)}, {"": {"role": new_role}})
+    return {"status": "success", "new_role": new_role}
+
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_user: UserOut = Depends(check_role("instructor"))):
+    db = get_db()
+    # Prevent deleting yourself
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+        
+    result = await db.users.delete_one({"_id": ObjectId(user_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"status": "deleted"}

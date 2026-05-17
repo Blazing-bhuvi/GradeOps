@@ -102,10 +102,47 @@ class S3Storage(StorageBackend):
         return f"s3://{self.bucket}/{self.prefix}{key}"
 
 
+class MongoStorage(StorageBackend):
+    """
+    MongoDB GridFS backend. Stores files directly in your MongoDB cluster.
+    Perfect for Vercel/Serverless where local disk is read-only.
+    """
+
+    def __init__(self):
+        import gridfs
+        from pymongo import MongoClient
+        from pipeline.config import settings
+
+        # GridFS requires a synchronous client for the standard API
+        self.client = MongoClient(settings.mongo_uri)
+        self.db = self.client[settings.db_name]
+        self.fs = gridfs.GridFS(self.db)
+
+    def write(self, key: str, data: bytes) -> str:
+        # Delete existing file with same key to simulate overwrite
+        existing = self.db.fs.files.find_one({"filename": key})
+        if existing:
+            self.fs.delete(existing["_id"])
+
+        self.fs.put(data, filename=key)
+        return key
+
+    def read(self, key: str) -> bytes:
+        out = self.fs.find_one({"filename": key})
+        if not out:
+            raise FileNotFoundError(f"GridFS file not found: {key}")
+        return out.read()
+
+    def url(self, key: str) -> str:
+        # We'll create a dedicated proxy route in FastAPI to serve these bytes
+        return f"/api/storage/file?key={key}"
+
+
 def get_storage() -> StorageBackend:
     """Factory — reads config and returns the appropriate backend."""
     from pipeline.config import settings
     if settings.storage_backend == "s3":
         return S3Storage(bucket=settings.s3_bucket)
-    # "gcs" support can be added here similarly
+    if settings.storage_backend == "mongodb":
+        return MongoStorage()
     return LocalStorage(root_dir=settings.local_storage_path)

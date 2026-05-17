@@ -21,6 +21,7 @@ from pipeline.server.routes.pipeline import router as pipeline_router
 from pipeline.server.routes.review   import router as review_router
 from pipeline.server.routes.metadata import router as metadata_router
 from pipeline.server.routes.auth     import router as auth_router
+from pipeline.server.routes.storage  import router as storage_router
 from fastapi.staticfiles import StaticFiles
 import os
 from pipeline.server import ws as ws_manager
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
     app.include_router(review_router)
     app.include_router(metadata_router)
     app.include_router(auth_router)
+    app.include_router(storage_router)
 
     # ── WebSocket ─────────────────────────────────────────────────────────────
     @app.websocket("/ws/{exam_id}")
@@ -91,6 +93,11 @@ def create_app() -> FastAPI:
     # Serve static files from the project root.
     # We mount this LAST so it doesn't shadow the API routes.
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    
+    # Also mount the scratch directory specifically for images and uploads
+    scratch_dir = os.path.abspath(settings.local_storage_path)
+    app.mount("/scratch", StaticFiles(directory=scratch_dir), name="scratch")
+    
     app.mount("/", StaticFiles(directory=root_dir, html=True), name="static")
 
     return app

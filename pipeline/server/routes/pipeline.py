@@ -26,6 +26,7 @@ from pipeline.graph import graph
 from pipeline.server.routes.metadata import register_exam, ExamMetadata
 from pipeline.server.db import get_db
 from pipeline.server.routes.auth import check_role, UserOut
+from pipeline.tools.storage import get_storage
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
@@ -113,25 +114,29 @@ async def start_pipeline(
     exam_name = name or f"Exam {eid[-8:]}"
 
     # ── Load Rubric ───────────────────────────────────────────────────────────
+    storage = get_storage()
     if rubric_id:
-        rubric_path = Path(settings.local_storage_path) / "metadata" / "rubrics" / f"{rubric_id}.json"
-        if not rubric_path.exists():
-            raise HTTPException(status_code=404, detail=f"Rubric {rubric_id} not found")
-        rubric_raw = rubric_path.read_text()
+        try:
+            # Rubrics might be stored locally or in S3 depending on config
+            rubric_raw = storage.read(f"metadata/rubrics/{rubric_id}.json").decode()
+        except Exception:
+            # Fallback to local Path for transition period/dev
+            rubric_path = Path(settings.local_storage_path) / "metadata" / "rubrics" / f"{rubric_id}.json"
+            if rubric_path.exists():
+                rubric_raw = rubric_path.read_text()
+            else:
+                raise HTTPException(status_code=404, detail=f"Rubric {rubric_id} not found")
     elif rubric:
         rubric_raw = (await rubric.read()).decode(errors='replace')
     else:
         raise HTTPException(status_code=400, detail="Either rubric file or rubric_id is required")
 
     # ── Save uploaded PDF ─────────────────────────────────────────────────────
-    upload_dir = Path(settings.local_storage_path) / "uploads"
-    upload_dir.mkdir(parents=True, exist_ok=True)
-
-    pdf_path = upload_dir / f"{eid}.pdf"
-    pdf_path.write_bytes(await pdf.read())
+    pdf_bytes = await pdf.read()
+    pdf_storage_path = storage.write(f"uploads/{eid}.pdf", pdf_bytes)
 
     initial_state = {
-        "_pdf_path":          str(pdf_path),
+        "_pdf_path":          pdf_storage_path,
         "_rubric_raw":        rubric_raw,
         "exam_id":            eid,
         "course_id":          course_id,
@@ -266,15 +271,11 @@ async def get_pipeline_state(exam_id: str):
 async def export_gradebook_csv(exam_id: str):
     """
     Download the final gradebook for an exam as a CSV file.
-
-    The CSV contains one row per student with columns:
-    student_id, final_score, max_score, ai_score, ta_decision, ta_comment,
-    ocr_confidence, plagiarism_flag, plagiarism_match
-
-    The gradebook.json must exist (i.e. all reviews must be complete).
     """
-    gradebook_path = Path(settings.local_storage_path) / exam_id / "gradebook.json"
-    if not gradebook_path.exists():
+    storage = get_storage()
+    try:
+        gradebook_data = storage.read(f"{exam_id}/gradebook.json")
+    except Exception:
         raise HTTPException(
             status_code=404,
             detail=(
@@ -283,7 +284,7 @@ async def export_gradebook_csv(exam_id: str):
             ),
         )
 
-    data = json.loads(gradebook_path.read_text())
+    data = json.loads(gradebook_data)
     gradebook_entries = data.get("gradebook", [])
     stats = data.get("stats", {})
     rubric = data.get("rubric", {})
@@ -346,16 +347,16 @@ async def export_gradebook_csv(exam_id: str):
 async def export_gradebook_json(exam_id: str):
     """
     Download the raw gradebook JSON produced by the finalize agent.
-    Useful for integration with other systems.
     """
-    gradebook_path = Path(settings.local_storage_path) / exam_id / "gradebook.json"
-    if not gradebook_path.exists():
+    storage = get_storage()
+    try:
+        content = storage.read(f"{exam_id}/gradebook.json")
+    except Exception:
         raise HTTPException(
             status_code=404,
             detail=f"Gradebook for exam '{exam_id}' not found.",
         )
 
-    content = gradebook_path.read_bytes()
     filename = f"gradebook_{exam_id}.json"
 
     return Response(

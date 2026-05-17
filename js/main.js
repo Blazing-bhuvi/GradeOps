@@ -10,10 +10,19 @@
 import { store } from './state.js';
 import { navigate, renderNav } from './router.js';
 import { getCourses } from './api/courses.js';
-import { isAuthenticated, logout } from './api/auth.js';
+import { isAuthenticated, logout, verifySession } from './api/auth.js';
 
 async function boot() {
-  // Read initial page from URL (supports deep-linking)
+  // 1. Verify if current session is actually valid
+  if (isAuthenticated()) {
+    const isValid = await verifySession();
+    if (!isValid) {
+      console.warn('[auth] Session invalid or expired. Logging out.');
+      logout();
+    }
+  }
+
+  // 2. Read initial page from URL (supports deep-linking)
   const params  = new URL(window.location).searchParams;
   let initPage = params.get('page') ?? 'dashboard';
 

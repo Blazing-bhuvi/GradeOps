@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/metadata/(.*)", "destination": "api/index.py" },
+    { "source": "/pipeline/(.*)", "destination": "api/index.py" },
+    { "source": "/review/(.*)", "destination": "api/index.py" },
+    { "source": "/auth/(.*)", "destination": "api/index.py" },
+    { "source": "/api/(.*)", "destination": "api/index.py" }
+  ]
+}

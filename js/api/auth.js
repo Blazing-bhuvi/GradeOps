@@ -4,7 +4,9 @@
 
 import { store } from '../state.js';
 
-const API_BASE = window.location.port === '3000' ? 'http://localhost:8000' : '';
+const API_BASE = (window.location.port === '3000' || window.location.hostname === 'localhost') 
+  ? 'http://localhost:8000' 
+  : '';
 
 export async function login(email, password) {
   const params = new URLSearchParams();
@@ -57,11 +59,29 @@ export async function getMe() {
   });
 
   if (!res.ok) {
-    logout();
+    if (res.status === 401) {
+      logout();
+    }
     throw new Error('Session expired');
   }
 
   return res.json();
+}
+
+/**
+ * Verifies if the stored token is still valid with the backend.
+ * Returns true if valid, false otherwise.
+ */
+export async function verifySession() {
+  if (!store.token) return false;
+  try {
+    const user = await getMe();
+    store.user = user;
+    store.role = user.role;
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 export function logout() {

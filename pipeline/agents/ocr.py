@@ -73,14 +73,22 @@ async def _ocr_student_throttled(
     from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
     # Build message with all page images inline
+    from pipeline.tools.storage import get_storage
+    storage = get_storage()
+    
     content: list[dict] = [{"type": "text", "text": _build_ocr_prompt()}]
     for page_path in student["page_paths"]:
-        img_bytes = Path(page_path).read_bytes()
-        b64 = base64.b64encode(img_bytes).decode()
-        content.append({
-            "type":      "image_url",
-            "image_url": {"url": f"data:image/png;base64,{b64}"},
-        })
+        # Use storage.read(key) instead of Path(path).read_bytes()
+        # The key is the path stored during ingestion
+        try:
+            img_bytes = storage.read(page_path)
+            b64 = base64.b64encode(img_bytes).decode()
+            content.append({
+                "type":      "image_url",
+                "image_url": {"url": f"data:image/png;base64,{b64}"},
+            })
+        except Exception as e:
+            print(f"[ocr] Error reading image {page_path}: {e}")
 
     @retry(
         retry=retry_if_exception_type((ChatGoogleGenerativeAIError, Exception)),

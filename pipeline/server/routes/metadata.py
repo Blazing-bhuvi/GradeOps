@@ -4,6 +4,7 @@ server/routes/metadata.py — Persistent storage for Courses, Rubrics, and Exams
 
 from __future__ import annotations
 import uuid
+import asyncio
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from pipeline.server.db import get_db
@@ -118,23 +119,24 @@ async def get_exams():
     cursor = db.exams.find({}, {"_id": 0}).sort("uploaded", -1)
     exams = await cursor.to_list(length=100)
     
-    for exam in exams:
+    async def populate_exam(exam):
         eid = exam.get("id")
-        if not eid: continue
+        if not eid: return exam
         
         # If the exam is graded, ensure we have the latest counts from submissions
         if exam.get("status") in ["graded", "complete"]:
-            # Count total submissions for this exam
             total = await db.submissions.count_documents({"exam_id": eid})
             if total > 0:
                 exam["students"] = total
-                exam["reviewed"] = total # All must be reviewed to be graded
+                exam["reviewed"] = total
             elif "stats" in exam and exam["stats"].get("total_students"):
-                # Fallback to stats if submissions collection isn't populated for some reason
                 exam["students"] = exam["stats"]["total_students"]
                 exam["reviewed"] = exam["stats"]["total_students"]
-    
-    return exams
+        return exam
+
+    # Parallelize counting tasks
+    populated_exams = await asyncio.gather(*(populate_exam(e) for e in exams))
+    return populated_exams
 
 @router.post("/exams")
 async def register_exam(exam: ExamMetadata, current_user: UserOut = Depends(check_role("instructor"))):
