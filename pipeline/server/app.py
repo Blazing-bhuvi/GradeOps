@@ -94,9 +94,11 @@ def create_app() -> FastAPI:
     # We mount this LAST so it doesn't shadow the API routes.
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     
-    # Also mount the scratch directory specifically for images and uploads
-    scratch_dir = os.path.abspath(settings.local_storage_path)
-    app.mount("/scratch", StaticFiles(directory=scratch_dir), name="scratch")
+    # Also mount the scratch directory specifically for images and uploads (LOCAL ONLY)
+    if settings.storage_backend == "local":
+        scratch_dir = os.path.abspath(settings.local_storage_path)
+        if os.path.exists(scratch_dir):
+            app.mount("/scratch", StaticFiles(directory=scratch_dir), name="scratch")
     
     app.mount("/", StaticFiles(directory=root_dir, html=True), name="static")
 

@@ -132,11 +132,20 @@ async def start_pipeline(
         raise HTTPException(status_code=400, detail="Either rubric file or rubric_id is required")
 
     # ── Save uploaded PDF ─────────────────────────────────────────────────────
+    import tempfile
+    
     pdf_bytes = await pdf.read()
+    
+    # Use /tmp for serverless compatibility during PDF splitting
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(pdf_bytes)
+        temp_pdf_path = tmp.name
+        
+    # Still write to our official storage (GridFS)
     pdf_storage_path = storage.write(f"uploads/{eid}.pdf", pdf_bytes)
 
     initial_state = {
-        "_pdf_path":          pdf_storage_path,
+        "_pdf_path":          temp_pdf_path,
         "_rubric_raw":        rubric_raw,
         "exam_id":            eid,
         "course_id":          course_id,

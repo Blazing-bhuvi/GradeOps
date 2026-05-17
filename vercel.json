@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     { "source": "/metadata/(.*)", "destination": "api/index.py" },
     { "source": "/pipeline/(.*)", "destination": "api/index.py" },
