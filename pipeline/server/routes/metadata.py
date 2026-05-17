@@ -5,6 +5,7 @@ server/routes/metadata.py — Persistent storage for Courses, Rubrics, and Exams
 from __future__ import annotations
 import uuid
 import asyncio
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from pipeline.server.db import get_db
@@ -33,7 +34,7 @@ class ExamMetadata(BaseModel):
     course: str
     courseId: str | None = Field(default=None) # CamelCase to match frontend expectations
     rubric: str | None = None
-    uploaded: str
+    uploaded: str = Field(default_factory=lambda: datetime.now().strftime("%b %d, %Y"))
     status: str = "processing"
     students: int = 0
     reviewed: int = 0

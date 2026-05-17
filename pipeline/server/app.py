@@ -25,7 +25,7 @@ from pipeline.server.routes.storage  import router as storage_router
 from fastapi.staticfiles import StaticFiles
 import os
 from pipeline.server import ws as ws_manager
-from pipeline.server.db import close_db_connection
+from pipeline.server.db import close_db_connection, create_indexes
 from pipeline.server.routes.pipeline import resume_active_pipelines
 
 
@@ -42,6 +42,7 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     async def startup_event():
+        await create_indexes()
         await resume_active_pipelines()
 
     @app.on_event("shutdown")

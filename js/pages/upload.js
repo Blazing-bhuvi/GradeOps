@@ -226,6 +226,9 @@ function bindEvents(container) {
 }
 
 function setPdf(file, container) {
+  if (file.size > 4.5 * 1024 * 1024 && window.location.hostname !== 'localhost') {
+    showToast('Warning: File exceeds 4.5MB. Vercel may block this upload.', 'error');
+  }
   pdfFile = file;
   container.querySelector('#pdf-label').textContent = `✓ ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
   container.querySelector('#drop-pdf').style.borderColor = 'var(--brand)';
@@ -281,9 +284,11 @@ async function handleSubmit(container) {
     await createExam({
       id: exam_id,
       name: currentExamName,
-      course: course ? course.code : 'CS 301',
+      course: course ? `${course.code} — ${course.name}` : 'CS 301',
       courseId: courseId,
-      rubric: rubricName
+      rubric: rubricName,
+      uploaded: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      status: 'processing'
     });
 
     setProgress(container, 40, 'Ingestion complete', 'Splitting PDF into per-student pages…');

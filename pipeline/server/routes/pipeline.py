@@ -114,18 +114,14 @@ async def start_pipeline(
     exam_name = name or f"Exam {eid[-8:]}"
 
     # ── Load Rubric ───────────────────────────────────────────────────────────
-    storage = get_storage()
     if rubric_id:
-        try:
-            # Rubrics might be stored locally or in S3 depending on config
-            rubric_raw = storage.read(f"metadata/rubrics/{rubric_id}.json").decode()
-        except Exception:
-            # Fallback to local Path for transition period/dev
-            rubric_path = Path(settings.local_storage_path) / "metadata" / "rubrics" / f"{rubric_id}.json"
-            if rubric_path.exists():
-                rubric_raw = rubric_path.read_text()
-            else:
-                raise HTTPException(status_code=404, detail=f"Rubric {rubric_id} not found")
+        db = get_db()
+        rubric_doc = await db.rubrics.find_one({"id": rubric_id})
+        if not rubric_doc:
+            raise HTTPException(status_code=404, detail=f"Rubric {rubric_id} not found in database")
+        rubric_raw = rubric_doc.get("rubric_json")
+        if not rubric_raw:
+            raise HTTPException(status_code=500, detail="Rubric found but contains no data")
     elif rubric:
         rubric_raw = (await rubric.read()).decode(errors='replace')
     else:
