@@ -119,12 +119,16 @@ async def get_exams():
     cursor = db.exams.find({}, {"_id": 0}).sort("uploaded", -1)
     exams = await cursor.to_list(length=100)
     
+    from pipeline.graph import graph
+    from pipeline.server.routes.pipeline import _config
+    
     async def populate_exam(exam):
         eid = exam.get("id")
+        status = exam.get("status")
         if not eid: return exam
         
-        # If the exam is graded, ensure we have the latest counts from submissions
-        if exam.get("status") in ["graded", "complete"]:
+        # 1. If graded, count from submissions collection
+        if status in ["graded", "complete"]:
             total = await db.submissions.count_documents({"exam_id": eid})
             if total > 0:
                 exam["students"] = total
@@ -132,9 +136,37 @@ async def get_exams():
             elif "stats" in exam and exam["stats"].get("total_students"):
                 exam["students"] = exam["stats"]["total_students"]
                 exam["reviewed"] = exam["stats"]["total_students"]
+        
+        # 2. If processing, check active graph state for real-time progress
+        elif status in ["processing", "awaiting_review"]:
+            try:
+                # Use synchronous get_state inside thread pool or just call directly 
+                # (graph instance is usually fast enough for state retrieval)
+                snapshot = graph.get_state(_config(eid))
+                if snapshot and snapshot.values:
+                    graph_students = snapshot.values.get("students", [])
+                    exam["students"] = len(graph_students)
+                    
+                    reviewed_count = 0
+                    for s in graph_students:
+                        decision = s.get("ta_decision")
+                        if isinstance(decision, dict):
+                            if decision.get("action") and decision.get("action") not in ["pending", None]:
+                                reviewed_count += 1
+                        elif decision and decision not in ["pending", ""]:
+                            reviewed_count += 1
+                    exam["reviewed"] = reviewed_count
+                    
+                    # Update status if an interrupt is found
+                    has_interrupt = any(t.interrupts for t in snapshot.tasks)
+                    if has_interrupt:
+                        exam["status"] = "awaiting_review"
+            except:
+                pass # Silently fail and keep metadata values
+                
         return exam
 
-    # Parallelize counting tasks
+    # Parallelize count and state lookups
     populated_exams = await asyncio.gather(*(populate_exam(e) for e in exams))
     return populated_exams
 
