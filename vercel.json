@@ -5,6 +5,7 @@
       "maxDuration": 60
     }
   },
+  "regions": ["bom1"],
   "rewrites": [
     { "source": "/metadata/(.*)", "destination": "api/index.py" },
     { "source": "/pipeline/(.*)", "destination": "api/index.py" },
