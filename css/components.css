@@ -245,6 +245,22 @@ input::placeholder, textarea::placeholder {
   color: var(--neutral-400);
 }
 
+/* ── Browser Autofill Inversion Patch ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  border: 1px solid var(--neutral-200);
+  -webkit-text-fill-color: var(--neutral-900) !important;
+  /* Intercepts background rewriting loops by setting an infinite delay on the color fill */
+  transition: background-color 5000000s ease-in-out 0s;
+}
+
 /* ── Progress bar ────────────────────────────────────────── */
 .progress {
   height: 3px;
@@ -334,4 +350,66 @@ input::placeholder, textarea::placeholder {
 .ti-spin, .ti-loader, .ti-loader-2, .ti-loader-3 {
   animation: spin 1s linear infinite !important;
   display: inline-block !important;
+}
+
+/* ── Review Queue Decision Box Controls ── */
+[data-theme="dark"] #main-content button:not(.btn-primary):not(.btn-danger),
+[data-theme="dark"] div:has(> .form-group) ~ div button,
+[data-theme="dark"] .card + div button,
+[data-theme="dark"] .decision-option,
+[data-theme="dark"] .action-card,
+[data-theme="dark"] [class*="decision"] {
+  background-color: var(--neutral-50) !important;
+  border-color: var(--neutral-200) !important;
+  color: var(--neutral-900) !important;
+}
+
+[data-theme="dark"] #main-content button:not(.btn-primary):not(.btn-danger) *,
+[data-theme="dark"] div:has(> .form-group) ~ div button *,
+[data-theme="dark"] .card + div button *,
+[data-theme="dark"] .decision-option *,
+[data-theme="dark"] .action-card *,
+[data-theme="dark"] [class*="decision"] * {
+  color: var(--neutral-900) !important;
+  fill: var(--neutral-900) !important;
+}
+
+[data-theme="dark"] #main-content button:not(.btn-primary):not(.btn-danger) span,
+[data-theme="dark"] #main-content button:not(.btn-primary):not(.btn-danger) p,
+[data-theme="dark"] .decision-option span,
+[data-theme="dark"] [class*="decision"] span {
+  color: var(--neutral-600) !important;
+}
+
+/* Hover dynamic mapping rules */
+[data-theme="dark"] #main-content button:not(.btn-primary):not(.btn-danger):hover,
+[data-theme="dark"] div:has(> .form-group) ~ div button:hover,
+[data-theme="dark"] .card + div button:hover,
+[data-theme="dark"] .decision-option:hover,
+[data-theme="dark"] .action-card:hover {
+  background-color: var(--neutral-100) !important;
+}
+
+/* ── Input Number Spin Buttons Dark Mode Fix ── */
+[data-theme="dark"] input[type="number"] {
+  color-scheme: dark !important;
+}
+
+[data-theme="dark"] input[type="number"]::-webkit-inner-spin-button,
+[data-theme="dark"] input[type="number"]::-webkit-outer-spin-button {
+  filter: invert(1) brightness(2) !important;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .card:has(canvas),
+[data-theme="dark"] .card:has(svg) {
+  background-color: var(--neutral-50) !important;
+}
+
+/* Isolated target for SVG layout rule markings without leaking to structural layout buttons */
+[data-theme="dark"] .card:has(canvas) text,
+[data-theme="dark"] .card:has(svg) text,
+[data-theme="dark"] [class*="axis"] {
+  fill: var(--neutral-400) !important;
+  color: var(--neutral-400) !important;
 }
