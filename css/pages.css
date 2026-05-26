@@ -9,12 +9,13 @@
 }
 
 .metric {
-  background: #fff;
+  background: var(--neutral-50);
   border: 1px solid var(--neutral-200);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
   position: relative;
   overflow: hidden;
+  transition: background-color var(--t-base), border-color var(--t-base);
 }
 
 .metric::before {
@@ -45,6 +46,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color var(--t-base);
 }
 
 .metric-value {
@@ -53,12 +55,14 @@
   color: var(--neutral-900);
   letter-spacing: -0.5px;
   line-height: 1.2;
+  transition: color var(--t-base);
 }
 
 .metric-sub {
   font-size: var(--text-xs);
   color: var(--neutral-400);
   margin-top: 2px;
+  transition: color var(--t-base);
 }
 
 /* ── Row item (exams, rubrics, queue items) ──────────────── */
@@ -85,6 +89,7 @@
   justify-content: center;
   flex-shrink: 0;
   font-size: 16px;
+  transition: background-color var(--t-base), color var(--t-base);
 }
 
 .row-icon.blue   { background: var(--info-tint);    color: var(--info); }
@@ -101,12 +106,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--neutral-900);
+  transition: color var(--t-base);
 }
 
 .row-meta {
   font-size: var(--text-xs);
   color: var(--neutral-400);
   margin-top: 1px;
+  transition: color var(--t-base);
 }
 
 .row-actions { display: flex; gap: 6px; flex-shrink: 0; }
@@ -144,11 +151,13 @@
   font-weight: 500;
   color: var(--neutral-900);
   margin-bottom: 2px;
+  transition: color var(--t-base);
 }
 
 .upload-zone small {
   font-size: var(--text-xs);
   color: var(--neutral-400);
+  transition: color var(--t-base);
 }
 
 /* ── Grids ───────────────────────────────────────────────── */
@@ -166,6 +175,7 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 10px;
+  transition: color var(--t-base);
 }
 
 /* ── Inline key-value ────────────────────────────────────── */
@@ -178,8 +188,8 @@
 }
 
 .kv-row + .kv-row { border-top: 1px solid var(--neutral-100); }
-.kv-key   { color: var(--neutral-600); }
-.kv-val   { font-weight: 500; color: var(--neutral-900); }
+.kv-key   { color: var(--neutral-600); transition: color var(--t-base); }
+.kv-val   { font-weight: 500; color: var(--neutral-900); transition: color var(--t-base); }
 
 /* ── Step list (upload workflow) ─────────────────────────── */
 .step-list { display: flex; flex-direction: column; gap: 12px; }
@@ -204,10 +214,11 @@
   color: var(--neutral-600);
   flex-shrink: 0;
   margin-top: 1px;
+  transition: background-color var(--t-base), border-color var(--t-base), color var(--t-base);
 }
 
-.step-title { font-size: var(--text-base); font-weight: 500; }
-.step-desc  { font-size: var(--text-xs); color: var(--neutral-400); margin-top: 1px; }
+.step-title { font-size: var(--text-base); font-weight: 500; transition: color var(--t-base); }
+.step-desc  { font-size: var(--text-xs); color: var(--neutral-400); margin-top: 1px; transition: color var(--t-base); }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 900px) {
