@@ -26,13 +26,13 @@
   --info:          #1A5EA8;
   --info-tint:     #E8F1FC;
 
-  /* Neutral */
-  --neutral-50:  #F9F9F8;
-  --neutral-100: #F2F2F0;
-  --neutral-200: #E6E5E2;
-  --neutral-400: #B0AFA9;
-  --neutral-600: #6B6A65;
-  --neutral-900: #1A1A18;
+  /* ─── LIGHT MODE NEUTRALS (Default) ─── */
+  --neutral-50:  #F9F9F8;  /* Lightest background (panels, cards) */
+  --neutral-100: #F2F2F0;  /* Main app structural background */
+  --neutral-200: #E6E5E2;  /* Borders, dividers, subtle accents */
+  --neutral-400: #B0AFA9;  /* Muted text, borders, placeholders */
+  --neutral-600: #6B6A65;  /* Secondary / body summary text */
+  --neutral-900: #1A1A18;  /* Primary prominent text */
 
   /* Typography scale */
   --text-xs:   11px;
@@ -57,6 +57,27 @@
   --t-base: 200ms ease;
 }
 
+/* ─── DARK MODE NEUTRALS OVERRIDES ─── */
+[data-theme="dark"] {
+  --neutral-50:  #141412;  /* Elevated panel surfaces */
+  --neutral-100: #1A1A18;  /* Dark background wrapper */
+  --neutral-200: #2D2D2A;  /* Dark borders and dividers */
+  --neutral-400: #7A7973;  /* Low contrast text / disabled */
+  --neutral-600: #A5A49E;  /* Secondary legible text */
+  --neutral-900: #F5F5F2;  /* Ultra crisp light text */
+
+  /* Shadows tuned to show depth on darker panels */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.2);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.3);
+
+  /* Dimmed container tints for low-light environments */
+  --brand-tint:   #113127;
+  --brand-tint2:  #164435;
+  --danger-tint:  #3A1815;
+  --warning-tint: #2B1E0A;
+  --info-tint:    #0F253F;
+}
+
 body {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   background: var(--neutral-100);
@@ -66,6 +87,11 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--t-base), color var(--t-base), border-color var(--t-base);
 }
 
-/* Inter font — loaded via Google Fonts in index.html */
+/* ─── TOGGLE ICON MANAGEMENT ─── */
+[data-theme="dark"] .icon-dark { display: inline-block; }
+[data-theme="dark"] .icon-light { display: none; }
+:root:not([data-theme="dark"]) .icon-dark { display: none; }
+:root:not([data-theme="dark"]) .icon-light { display: inline-block; }
