@@ -9,7 +9,7 @@
 /* ── Header ─────────────────────────────────────────────── */
 .header {
   height: var(--hdr);
-  background: #fff;
+  background: var(--neutral-50);
   border-bottom: 1px solid var(--neutral-200);
   display: flex;
   align-items: center;
@@ -18,6 +18,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background-color var(--t-base), border-color var(--t-base);
 }
 
 .logo {
@@ -42,12 +43,14 @@
   width: 1px;
   height: 18px;
   background: var(--neutral-200);
+  transition: background-color var(--t-base);
 }
 
 .header-course {
   font-size: var(--text-sm);
   color: var(--neutral-600);
   font-weight: 400;
+  transition: color var(--t-base);
 }
 
 .header-right {
@@ -65,6 +68,7 @@
   border-radius: var(--radius-md);
   padding: 3px;
   gap: 2px;
+  transition: background-color var(--t-base), border-color var(--t-base);
 }
 
 .role-opt {
@@ -81,10 +85,18 @@
   line-height: 1.5;
 }
 
-.role-opt:hover { color: var(--neutral-900); background: rgba(255,255,255,0.8); }
+.role-opt:hover { 
+  color: var(--neutral-900); 
+  background: rgba(var(--neutral-400), 0.15);
+}
+
+/* Dynamic dark theme adjustment for the role option hover trace */
+[data-theme="dark"] .role-opt:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
 
 .role-opt.active {
-  background: #fff;
+  background: var(--neutral-50);
   color: var(--neutral-900);
   box-shadow: var(--shadow-sm);
 }
@@ -98,7 +110,7 @@
 
 .sidebar {
   width: var(--sidebar);
-  background: #fff;
+  background: var(--neutral-50);
   border-right: 1px solid var(--neutral-200);
   padding: 8px 0 16px;
   flex-shrink: 0;
@@ -106,6 +118,7 @@
   top: var(--hdr);
   height: calc(100vh - var(--hdr));
   overflow-y: auto;
+  transition: background-color var(--t-base), border-right-color var(--t-base);
 }
 
 .main {
@@ -123,6 +136,7 @@
   color: var(--neutral-400);
   text-transform: uppercase;
   letter-spacing: 0.9px;
+  transition: color var(--t-base);
 }
 
 .nav-item {
@@ -138,7 +152,7 @@
   font-size: var(--text-base);
   font-weight: 400;
   user-select: none;
-  border-left: none; /* override old style */
+  border-left: none;
 }
 
 .nav-item:hover {
@@ -150,6 +164,7 @@
   background: var(--brand-tint);
   color: var(--brand-dark);
   font-weight: 500;
+  transition: background-color var(--t-base), color var(--t-base);
 }
 
 .nav-item i {
@@ -193,6 +208,7 @@
   font-weight: 600;
   flex-shrink: 0;
   letter-spacing: 0.3px;
+  cursor: pointer; /* User session action utility indicator */
 }
 
 @media (max-width: 768px) {
