@@ -30,20 +30,26 @@
 
   <!-- HEADER -->
   <header class="header">
-    <div class="logo">
-      <span class="logo-dot"></span> GradeFlow
-    </div>
-    <div class="header-divider" aria-hidden="true"></div>
-    <span id="course-label" class="header-course">GradeOps</span>
+  <div class="logo">
+    <span class="logo-dot"></span> GradeFlow
+  </div>
+  <div class="header-divider" aria-hidden="true"></div>
+  <span id="course-label" class="header-course">GradeOps</span>
 
-    <div class="header-right">
-      <div class="role-switch" role="group" aria-label="Switch role">
-        <button class="role-opt active" id="btn-instructor">Instructor</button>
-        <button class="role-opt"        id="btn-ta">TA</button>
-      </div>
-      <div id="user-avatar" class="avatar" style="background:#E1F5EE;color:#0F6E56" aria-label="Current user">RK</div>
+  <div class="header-right">
+    <div class="role-switch" role="group" aria-label="Switch role">
+      <button class="role-opt active" id="btn-instructor">Instructor</button>
+      <button class="role-opt"        id="btn-ta">TA</button>
     </div>
-  </header>
+    
+    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
+      <i class="ti ti-sun icon-light"></i>
+      <i class="ti ti-moon icon-dark"></i>
+    </button>
+
+    <div id="user-avatar" class="avatar" style="background:#E1F5EE;color:#0F6E56" aria-label="Current user">RK</div>
+  </div>
+</header>
 
   <div class="body">
     <!-- SIDEBAR — populated by sidebar.js -->
