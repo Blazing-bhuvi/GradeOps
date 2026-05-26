@@ -94,7 +94,7 @@ If you are new to the project and want to run it on your own computer, follow th
     *   (Optional) If you have a MongoDB cluster, paste your URI next to `MONGO_URI=`. Otherwise, it will save files to your computer.
 4.  **Run the System**:
     *   Open your terminal/command prompt in the project folder.
-    *   Run `./pipeline/start_server.sh` (Linux/Mac) or `./pipeline/start_server.bat` (Windows).
+    *   Run `./pipeline/start_server.sh` (Linux/Mac) or `/pipeline/start_server.bat` (Windows).
     *   Open your browser and go to `http://localhost:8000`.
 
 ---
@@ -106,7 +106,7 @@ If you are new to the project and want to run it on your own computer, follow th
 2. Install dependencies: `pip install -r pipeline/requirements.txt`.
 3. Configure the `.env` file with your MongoDB URI, Google/Groq API keys, and a random JWT Secret.
 4. Launch the backend: `python -m uvicorn pipeline.server.app:app --reload`.
-5. Serve the frontend: `npx serve .`.
+5. Serve the frontend: `npx serve`.
 
 ### Vercel Deployment
 1. Connect your repository to Vercel.
