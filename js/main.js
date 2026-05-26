@@ -2,15 +2,23 @@
  * main.js — Application entry point.
  *
  * Responsibilities:
- *  - Boot the app on DOMContentLoaded
- *  - Handle role switching (updates store + re-renders header + re-navigates)
- *  - Read initial page from URL query param
+ * - Boot the app on DOMContentLoaded
+ * - Handle role switching (updates store + re-renders header + re-navigates)
+ * - Read initial page from URL query param
+ * - Handle global light/dark theme state and events
  */
 
 import { store } from './state.js';
 import { navigate, renderNav } from './router.js';
 import { getCourses } from './api/courses.js';
 import { isAuthenticated, logout, verifySession } from './api/auth.js';
+
+// ─── IMMEDIATE THEME INITIALIZATION ───
+// Run instantly on load to prevent theme flashing before the DOM fully parses
+const savedTheme = localStorage.getItem('theme');
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialTheme = savedTheme ? savedTheme : (systemPrefersDark ? 'dark' : 'light');
+document.documentElement.setAttribute('data-theme', initialTheme);
 
 async function boot() {
   // 1. Verify if current session is actually valid
@@ -87,6 +95,15 @@ function bindGlobalEvents() {
       logout();
       window.location.reload();
     }
+  });
+
+  // ─── THEME TOGGLE EVENT LISTENER ───
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
   });
 }
 
